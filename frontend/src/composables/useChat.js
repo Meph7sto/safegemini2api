@@ -17,6 +17,8 @@ export function useChat() {
   const model = ref('gemini-2.5-flash')
   const sessionKey = ref('')
   const stream = ref(true)
+  const connectionMode = ref('local_cli')
+  const agentUrl = ref('')
 
   function setStatus(text, isError = false) {
     status.value = text
@@ -44,9 +46,13 @@ export function useChat() {
       model: model.value.trim() || 'gemini-2.5-flash',
       stream: stream.value,
       messages: outboundMessages,
+      connection_mode: connectionMode.value,
     }
     if (sessionKey.value.trim()) {
       payload.user = sessionKey.value.trim()
+    }
+    if (connectionMode.value === 'remote_agent' && agentUrl.value.trim()) {
+      payload.agent_url = agentUrl.value.trim()
     }
     return payload
   }
@@ -162,6 +168,8 @@ export function useChat() {
     model,
     sessionKey,
     stream,
+    connectionMode,
+    agentUrl,
     setStatus,
     clearMessages,
     submitPrompt,

@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 
 # ── Request ──────────────────────────────────────────────────────────
 
+
 class ChatMessage(BaseModel):
     """A single chat message."""
 
@@ -25,9 +26,12 @@ class ChatCompletionRequest(BaseModel):
     model: str = ""
     stream: bool = False
     user: str = ""
+    connection_mode: Literal["local_cli", "local_a2a", "remote_agent"] = "local_cli"
+    agent_url: Optional[str] = ""
 
 
 # ── Response helpers ─────────────────────────────────────────────────
+
 
 def new_chat_id() -> str:
     """Generate a unique chat completion ID."""
@@ -96,6 +100,7 @@ class ErrorResponse(BaseModel):
 
 # ── Factory functions (immutable – always return new instances) ───────
 
+
 def make_completion(
     *,
     chat_id: str,
@@ -127,9 +132,7 @@ def make_chunk(
     return ChatCompletionChunk(
         id=chat_id,
         model=model,
-        choices=[
-            StreamChoice(delta=delta, finish_reason=finish_reason)
-        ],
+        choices=[StreamChoice(delta=delta, finish_reason=finish_reason)],
     ).model_dump()
 
 

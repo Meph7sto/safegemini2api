@@ -1,6 +1,13 @@
 """Tests for backend.services.gemini_client module – unit-level helpers."""
 
+import asyncio
+
+import pytest
+
 from backend.services.gemini_client import (
+    GeminiCliClient,
+    GeminiCliConfig,
+    GeminiCliError,
     _diff_chunk,
     _extract_assistant_text_from_stream_event,
     _extract_text,
@@ -91,3 +98,46 @@ class TestDiffChunk:
         snapshot, delta = _diff_chunk("abc", "xyz")
         assert snapshot == "abcxyz"
         assert delta == "xyz"
+
+
+class _FakeStdout:
+    def __init__(self, chunks, delay: float = 0.0):
+        self._chunks = list(chunks)
+        self._delay = delay
+
+    async def read(self, _: int) -> bytes:
+        if self._delay:
+            await asyncio.sleep(self._delay)
+        if not self._chunks:
+            return b""
+        return self._chunks.pop(0)
+
+
+class _FakeProcess:
+    def __init__(self, chunks, delay: float = 0.0):
+        self.stdout = _FakeStdout(chunks, delay=delay)
+
+
+class TestReadStream:
+    @pytest.mark.asyncio
+    async def test_yields_assistant_stream_deltas(self):
+        client = GeminiCliClient(GeminiCliConfig())
+        process = _FakeProcess(
+            [
+                b'{"type":"message","message":{"role":"assistant","text":"hel"}}\n',
+                b'{"type":"message","message":{"role":"assistant","text":"hello"}}\n',
+                b"",
+            ]
+        )
+
+        chunks = [chunk async for chunk in client._read_stream(process, timeout=0.1)]
+
+        assert chunks == ["hel", "hello"]
+
+    @pytest.mark.asyncio
+    async def test_raises_timeout_when_stream_stalls(self):
+        client = GeminiCliClient(GeminiCliConfig())
+        process = _FakeProcess([], delay=0.05)
+
+        with pytest.raises(GeminiCliError, match="timed out after 10ms"):
+            _ = [chunk async for chunk in client._read_stream(process, timeout=0.01)]

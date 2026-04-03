@@ -14,6 +14,7 @@
 - `POST /v1/chat/completions`（`stream: true`，SSE）
 - `GET /v1/models`
 - `GET /healthz`
+- 三种连接模式：`local_cli` / `local_a2a` / `remote_agent`
 - 可选 Bearer 鉴权（设置 `OPENAI_API_KEY`）
 - 并发限制、超时限制、错误映射
 - Session 模式（增量消息传递）
@@ -45,7 +46,8 @@ bash ./start.sh
 脚本会自动：
 1. `uv sync` 安装后端依赖（自动创建 venv）
 2. 安装前端 npm 依赖
-3. 同时启动后端（8000）和前端（5173）
+3. 启动本地 A2A Agent（10000）
+4. 启动后端（8000）和前端（5173）
 
 ### 手动启动
 
@@ -65,6 +67,7 @@ npm run dev
 ```
 
 访问：
+- 本地 A2A Agent：`http://127.0.0.1:10000/agent-card`
 - 前端界面：`http://127.0.0.1:5173`
 - API 端点：`http://127.0.0.1:8000/v1/`
 
@@ -126,6 +129,11 @@ GEMINI_CLI_EXTRA_ARGS=["--approval-mode","plan"]
 - Base URL：`http://127.0.0.1:8000/v1`
 - API Key：与 `OPENAI_API_KEY` 保持一致（若服务端未设置可留空）
 - Model：`gemini-2.5-flash`
+
+前端里的连接模式说明：
+- `local_cli`：后端直接调用本机 Gemini CLI
+- `local_a2a`：后端通过本地 A2A Agent 调用本机 Gemini CLI
+- `remote_agent`：后端通过远端 A2A Agent 转发请求
 
 ## 上下文模式说明
 

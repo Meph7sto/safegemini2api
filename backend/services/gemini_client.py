@@ -252,13 +252,14 @@ class GeminiCliClient:
                 yield buffer.strip()
 
         try:
-            async for line in asyncio.timeout(timeout).__aenter__() and _read_lines():
-                payload = _safe_json_parse(line)
-                if not payload:
-                    continue
-                text = _extract_assistant_text_from_stream_event(payload)
-                if text:
-                    yield text
+            async with asyncio.timeout(timeout):
+                async for line in _read_lines():
+                    payload = _safe_json_parse(line)
+                    if not payload:
+                        continue
+                    text = _extract_assistant_text_from_stream_event(payload)
+                    if text:
+                        yield text
         except TimeoutError:
             raise GeminiCliError(
                 f"Gemini CLI timed out after {int(timeout * 1000)}ms"

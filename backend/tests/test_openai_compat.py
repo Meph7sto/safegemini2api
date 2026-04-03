@@ -102,6 +102,38 @@ class TestChatCompletions:
             assert data["object"] == "chat.completion"
             assert data["choices"][0]["message"]["content"] == "Hello!"
 
+    def test_local_a2a_non_stream(self, client):
+        with patch(
+            "backend.routers.openai_compat.A2AClient.generate",
+            new_callable=AsyncMock,
+            return_value={"text": "Hello from A2A", "raw": {}},
+        ) as mocked_generate:
+            resp = client.post(
+                "/v1/chat/completions",
+                json={
+                    "messages": [{"role": "user", "content": "hi"}],
+                    "stream": False,
+                    "connection_mode": "local_a2a",
+                },
+                headers={"Authorization": "Bearer test-key-123"},
+            )
+            assert resp.status_code == 200
+            data = resp.json()
+            assert data["choices"][0]["message"]["content"] == "Hello from A2A"
+            mocked_generate.assert_awaited_once()
+
+    def test_remote_agent_requires_url(self, client):
+        resp = client.post(
+            "/v1/chat/completions",
+            json={
+                "messages": [{"role": "user", "content": "hi"}],
+                "connection_mode": "remote_agent",
+            },
+            headers={"Authorization": "Bearer test-key-123"},
+        )
+        assert resp.status_code == 400
+        assert "Agent URL is required" in resp.json()["error"]["message"]
+
     def test_invalid_body_returns_422(self, client):
         resp = client.post(
             "/v1/chat/completions",

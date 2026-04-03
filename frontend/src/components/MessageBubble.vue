@@ -27,8 +27,8 @@ const roleLabel = computed(() => {
 <style scoped>
 .message-bubble {
   padding: 16px 18px;
-  border-radius: var(--radius-md);
-  animation: slide-up var(--duration-normal) var(--ease-smooth);
+  border-radius: 0;
+  animation: slide-up 0.25s ease;
   position: relative;
   overflow: hidden;
 }
@@ -44,30 +44,30 @@ const roleLabel = computed(() => {
 }
 
 .bubble-user {
-  background: rgba(106, 168, 254, 0.08);
-  border: 1px solid rgba(106, 168, 254, 0.15);
+  background: rgba(196, 105, 47, 0.1);
+  border: 1px solid rgba(196, 105, 47, 0.2);
 }
 
 .bubble-user::before {
-  background: linear-gradient(90deg, var(--accent-blue), transparent);
+  background: linear-gradient(90deg, var(--accent), transparent);
 }
 
 .bubble-assistant {
-  background: rgba(74, 222, 128, 0.06);
-  border: 1px solid rgba(74, 222, 128, 0.12);
+  background: rgba(47, 143, 137, 0.08);
+  border: 1px solid rgba(47, 143, 137, 0.15);
 }
 
 .bubble-assistant::before {
-  background: linear-gradient(90deg, var(--accent-green), transparent);
+  background: linear-gradient(90deg, var(--teal), transparent);
 }
 
 .bubble-system {
-  background: rgba(167, 139, 250, 0.06);
-  border: 1px solid rgba(167, 139, 250, 0.12);
+  background: rgba(28, 40, 52, 0.06);
+  border: 1px solid rgba(28, 40, 52, 0.1);
 }
 
 .bubble-system::before {
-  background: linear-gradient(90deg, var(--accent-purple), transparent);
+  background: linear-gradient(90deg, var(--ink-500), transparent);
 }
 
 .bubble-header {
@@ -83,23 +83,34 @@ const roleLabel = computed(() => {
   border-radius: 50%;
 }
 
-.indicator-user { background: var(--accent-blue); }
-.indicator-assistant { background: var(--accent-green); }
-.indicator-system { background: var(--accent-purple); }
+.indicator-user { background: var(--accent); }
+.indicator-assistant { background: var(--teal); }
+.indicator-system { background: var(--ink-500); }
 
 .role-label {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--text-secondary);
+  color: var(--ink-700);
 }
 
 .bubble-content {
   font-size: 0.9rem;
   line-height: 1.65;
-  color: var(--text-primary);
+  color: var(--ink-950);
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
