@@ -3,15 +3,15 @@ setlocal EnableExtensions EnableDelayedExpansion
 
 cd /d "%~dp0"
 
-call :load_env ".env"
-set "GEMINI_CLI_COMMAND="
-set "GEMINI_CLI_EXTRA_ARGS="
-set "GEMINI_WORKDIR="
-call :load_env ".env.windows"
+:: ── Check uv ──
+where uv >nul 2>nul
+if errorlevel 1 (
+  echo [start] Error: uv is not installed or not in PATH.
+  echo [start] Install: https://docs.astral.sh/uv/getting-started/installation/
+  exit /b 1
+)
 
-if not defined GEMINI_CLI_COMMAND set "GEMINI_CLI_COMMAND=gemini"
-if not defined GEMINI_CLI_EXTRA_ARGS set "GEMINI_CLI_EXTRA_ARGS=[--approval-mode,plan]"
-
+:: ── Check Node.js ──
 where node >nul 2>nul
 if errorlevel 1 (
   echo [start] Error: Node.js is not installed or not in PATH.
@@ -24,34 +24,39 @@ if errorlevel 1 (
   exit /b 1
 )
 
-where "%GEMINI_CLI_COMMAND%" >nul 2>nul
-if errorlevel 1 (
-  echo [start] Error: Gemini CLI command "%GEMINI_CLI_COMMAND%" is not installed or not in PATH.
-  echo [start] Please verify: %GEMINI_CLI_COMMAND% -p "hello"
-  exit /b 1
-)
+:: ── Backend setup ──
+echo [start] Syncing backend dependencies (uv)...
+uv sync --all-extras
+if errorlevel 1 exit /b 1
 
-node -e "require.resolve('vue/package.json')" >nul 2>nul
-if errorlevel 1 (
-  echo [start] dependencies missing, installing...
+:: ── Frontend setup ──
+if not exist "frontend\node_modules" (
+  echo [start] Installing frontend dependencies...
+  cd frontend
   call npm install
   if errorlevel 1 exit /b 1
+  cd ..
 )
 
-echo [start] Starting safegemini2api in dev mode...
-call npm run dev
-exit /b %errorlevel%
+:: ── Start both servers ──
+echo.
+echo [start] Starting backend (FastAPI) on port 8000...
+start "safegemini2api-backend" cmd /c "cd /d %~dp0 && uv run python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload"
 
-:load_env
-if exist "%~1" (
-  echo [start] Loading environment from %~1
-  for /f "usebackq tokens=* delims=" %%L in ("%~1") do (
-    set "line=%%L"
-    if not "!line!"=="" if not "!line:~0,1!"=="#" (
-      for /f "tokens=1,* delims==" %%A in ("!line!") do (
-        if not "%%A"=="" set "%%A=%%B"
-      )
-    )
-  )
-)
-exit /b 0
+echo [start] Starting frontend (Vite) on port 5173...
+start "safegemini2api-frontend" cmd /c "cd /d %~dp0\frontend && npm run dev"
+
+echo.
+echo ================================================
+echo   Backend:  http://127.0.0.1:8000
+echo   Frontend: http://127.0.0.1:5173
+echo   API:      http://127.0.0.1:8000/v1/
+echo ================================================
+echo.
+echo Press any key to stop both servers...
+pause >nul
+
+:: ── Cleanup ──
+taskkill /FI "WINDOWTITLE eq safegemini2api-backend" /T /F >nul 2>nul
+taskkill /FI "WINDOWTITLE eq safegemini2api-frontend" /T /F >nul 2>nul
+echo [start] Servers stopped.

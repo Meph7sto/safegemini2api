@@ -4,17 +4,14 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${ROOT_DIR}"
 
-load_env_file() {
-  local file="$1"
-  if [[ -f "${file}" ]]; then
-    echo "[start] Loading environment from ${file}"
-    set -a
-    # shellcheck disable=SC1090
-    source "${file}"
-    set +a
-  fi
-}
+# ── Check uv ──
+if ! command -v uv >/dev/null 2>&1; then
+  echo "[start] Error: uv is not installed or not in PATH."
+  echo "[start] Install: https://docs.astral.sh/uv/getting-started/installation/"
+  exit 1
+fi
 
+# ── Check Node.js ──
 if ! command -v node >/dev/null 2>&1; then
   echo "[start] Error: Node.js is not installed or not in PATH."
   exit 1
@@ -25,23 +22,41 @@ if ! command -v npm >/dev/null 2>&1; then
   exit 1
 fi
 
-load_env_file ".env"
-unset GEMINI_CLI_COMMAND GEMINI_CLI_EXTRA_ARGS GEMINI_WORKDIR
-load_env_file ".env.linux"
+# ── Backend setup ──
+echo "[start] Syncing backend dependencies (uv)..."
+uv sync --all-extras
 
-export GEMINI_CLI_COMMAND="${GEMINI_CLI_COMMAND:-gemini}"
-export GEMINI_CLI_EXTRA_ARGS="${GEMINI_CLI_EXTRA_ARGS:-[--approval-mode,plan]}"
-
-if ! command -v "${GEMINI_CLI_COMMAND}" >/dev/null 2>&1; then
-  echo "[start] Error: Gemini CLI command '${GEMINI_CLI_COMMAND}' is not installed or not in PATH."
-  echo "[start] Please verify: ${GEMINI_CLI_COMMAND} -p \"hello\""
-  exit 1
+# ── Frontend setup ──
+if [ ! -d "frontend/node_modules" ]; then
+  echo "[start] Installing frontend dependencies..."
+  (cd frontend && npm install)
 fi
 
-if ! node -e "require.resolve('vue/package.json')" >/dev/null 2>&1; then
-  echo "[start] dependencies missing, installing..."
-  npm install
-fi
+# ── Start both servers ──
+cleanup() {
+  echo ""
+  echo "[start] Stopping servers..."
+  kill "$BACKEND_PID" "$FRONTEND_PID" 2>/dev/null || true
+  wait "$BACKEND_PID" "$FRONTEND_PID" 2>/dev/null || true
+  echo "[start] Done."
+}
+trap cleanup EXIT INT TERM
 
-echo "[start] Starting safegemini2api in dev mode..."
-exec npm run dev
+echo ""
+echo "[start] Starting backend (FastAPI) on port 8000..."
+uv run python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload &
+BACKEND_PID=$!
+
+echo "[start] Starting frontend (Vite) on port 5173..."
+(cd frontend && npm run dev) &
+FRONTEND_PID=$!
+
+echo ""
+echo "================================================"
+echo "  Backend:  http://127.0.0.1:8000"
+echo "  Frontend: http://127.0.0.1:5173"
+echo "  API:      http://127.0.0.1:8000/v1/"
+echo "================================================"
+echo ""
+
+wait
