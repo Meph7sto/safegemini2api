@@ -4,11 +4,11 @@
 
 ## 为什么本方案更安全？（与传统 OAuth 反代的本质区别）
 
-在对接第三方客户端（如 SillyTavern）时，很多提供商会使用基于 OAuth 的云端反代服务。但使用那种传统反代方式极易**导致账号被封禁（封号）**，原因如下：
+在对接第三方客户端（如 SillyTavern）时，很多提供商会使用基于 OAuth 的云端反代服务。但使用那种传统反代方式极易**导致账号被封禁（封号）**，官方原文阐述如下：
 
-1. **异常环境与 IP 特征**：传统 OAuth 反代通常通过云端服务器（如常见 VPS 厂商 IP 段）集中向官方发起请求。官方的风控系统很容易检测出大量请求来源于不受信任的数据中心 IP，这与普通个人用户的活跃指纹完全不符。
-2. **凭据滥用与共享风险**：OAuth Token（或 Session 凭据）往往被上报并在云端代理侧复用。官方一旦察觉到凭据存在跨区调用或不合理的轨迹跳跃，直接就会触发安全策略封锁账号。
-3. **非法的 API 模拟**：部分反代通过逆向工程 Web 端（网页版）接口进行模拟请求，这种非官方声明的调用链路和特征参数，极易被反作弊检测拦截。
+Quick update to clear up some questions about recent changes.
+We’ve gotten a lot of questions on using Gemini CLI outside of the terminal. You can continue to use Gemini CLI via officially supported protocols, specifically ACP and A2A, in a local or remote terminal, and in our Headless mode, including integrations utilizing the -p flag. 
+You may not use Gemini CLI OAuth login screen to authenticate with a 3rd party application.
 
 **本项目的不同之处（防封号核心）：**
 
