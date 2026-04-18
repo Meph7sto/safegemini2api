@@ -67,9 +67,10 @@ pnpm-debug.log*
 .pnp.*
 frontend/dist/
 
-# IDE
+# IDE / Claude
 .idea/
 .vscode/
+.claude/
 *.swp
 *.swo
 
