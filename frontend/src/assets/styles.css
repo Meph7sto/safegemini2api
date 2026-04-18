@@ -147,22 +147,52 @@ body {
 
 .hero-buttons .hero-primary-btn {
   background:
-    radial-gradient(circle at 18% 24%, rgba(122, 230, 90, 0.32), transparent 26%),
-    radial-gradient(circle at 72% 32%, rgba(16, 137, 255, 0.34), transparent 32%),
-    radial-gradient(circle at 44% 76%, rgba(73, 214, 117, 0.28), transparent 28%),
+    radial-gradient(circle at 18% 24%, rgba(166, 255, 129, 0.42), transparent 26%),
+    radial-gradient(circle at 72% 32%, rgba(54, 182, 255, 0.44), transparent 32%),
+    radial-gradient(circle at 44% 76%, rgba(73, 214, 117, 0.34), transparent 28%),
+    linear-gradient(115deg, rgba(255,255,255,0.18) 18%, rgba(255,255,255,0.02) 36%, rgba(255,255,255,0.16) 54%, rgba(255,255,255,0.02) 72%),
     linear-gradient(135deg, var(--hero-primary-start) 0%, var(--hero-primary-mid) 48%, var(--hero-primary-end) 100%);
   color: var(--hero-primary-text);
   box-shadow: 0 14px 28px rgba(44, 167, 156, 0.26);
+  background-size: 165% 165%, 180% 180%, 170% 170%, 240% 240%, 200% 200%;
+  animation: hero-primary-flow 7s ease-in-out infinite;
 }
 
 .hero-buttons .hero-secondary-btn {
   background:
-    radial-gradient(circle at 24% 22%, rgba(10, 114, 255, 0.22), transparent 24%),
-    radial-gradient(circle at 72% 34%, rgba(83, 215, 60, 0.28), transparent 30%),
-    radial-gradient(circle at 46% 78%, rgba(18, 86, 201, 0.18), transparent 26%),
+    radial-gradient(circle at 24% 22%, rgba(37, 144, 255, 0.3), transparent 24%),
+    radial-gradient(circle at 72% 34%, rgba(116, 242, 84, 0.34), transparent 30%),
+    radial-gradient(circle at 46% 78%, rgba(18, 86, 201, 0.24), transparent 26%),
+    linear-gradient(115deg, rgba(255,255,255,0.14) 18%, rgba(255,255,255,0.02) 38%, rgba(255,255,255,0.12) 58%, rgba(255,255,255,0.02) 76%),
     linear-gradient(135deg, var(--hero-secondary-start) 0%, var(--hero-secondary-mid) 52%, var(--hero-secondary-end) 100%);
   color: var(--hero-secondary-text);
   box-shadow: 0 14px 28px rgba(40, 132, 44, 0.24);
+  background-size: 160% 160%, 170% 170%, 165% 165%, 230% 230%, 200% 200%;
+  animation: hero-secondary-flow 7.6s ease-in-out infinite;
+}
+
+@keyframes hero-primary-flow {
+  0% {
+    background-position: 12% 18%, 78% 28%, 40% 74%, 0% 46%, 0% 50%;
+  }
+  50% {
+    background-position: 26% 34%, 62% 42%, 54% 62%, 88% 58%, 100% 50%;
+  }
+  100% {
+    background-position: 12% 18%, 78% 28%, 40% 74%, 0% 46%, 0% 50%;
+  }
+}
+
+@keyframes hero-secondary-flow {
+  0% {
+    background-position: 22% 20%, 74% 30%, 46% 76%, 0% 48%, 0% 50%;
+  }
+  50% {
+    background-position: 34% 36%, 60% 40%, 56% 58%, 92% 56%, 100% 50%;
+  }
+  100% {
+    background-position: 22% 20%, 74% 30%, 46% 76%, 0% 48%, 0% 50%;
+  }
 }
 
 .home-screen {
@@ -207,6 +237,51 @@ body {
 
 .home-footer-link:hover {
   opacity: 0.72;
+}
+
+.guide-card {
+  margin-top: 24px;
+}
+
+.guide-card h3 {
+  margin-bottom: 12px;
+}
+
+.guide-card code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 14px;
+  background: rgba(14,15,12,0.05);
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.endpoint-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.endpoint-item {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid rgba(14,15,12,0.12);
+  border-radius: 18px;
+  background: #fafbf8;
+}
+
+.endpoint-item strong {
+  font-size: 15px;
+}
+
+.guide-note {
+  margin-top: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.guide-note p {
+  margin: 0;
 }
 
 .btn-green {
